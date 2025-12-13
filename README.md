@@ -9,10 +9,10 @@ MagicMirror² module that displays **today’s weather** and allows you to **set
 - Daily weather summary (current, high, low)
 - Feels-like temperature, humidity, and wind
 - Persistent storage via `localStorage`
-- Edit location anytime with a small gear button
+- Edit location anytime with a small gear button along the bottom of the module
 - Clean, mirror-friendly UI
 
-## Quick install (copy/paste)
+## One-line install (copy/paste)
 
 Run this on your Raspberry Pi (or any MagicMirror host):
 
@@ -32,7 +32,6 @@ Add the module to your `config.js`:
   module: "MMM-DailyWeatherPrompt",
   position: "top_left", // choose any MagicMirror position
   config: {
-    apiKey: "YOUR_OPENWEATHER_API_KEY",
     units: "imperial", // or "metric"
     updateInterval: 10 * 60 * 1000, // 10 minutes
     promptText: "Enter City, ST or ZIP",
@@ -45,21 +44,21 @@ Add the module to your `config.js`:
 ```
 
 ### Notes
-- The module uses the [OpenWeather](https://openweathermap.org/) current weather API. Supply your own API key via `apiKey`.
+- The module uses the free [Open-Meteo](https://open-meteo.com/) APIs (geocoding + current forecast). No API key required.
 - If `config.location` is empty, the module will prompt on-screen. The chosen value is saved to `localStorage` on the client.
-- `units` follows OpenWeather: `imperial` for °F/mph, `metric` for °C/km/h.
+- `units` follows Open-Meteo options: `imperial` for °F/mph, `metric` for °C/km/h.
 
 ## Interaction
 
 1. On first load (no location configured), the module displays an input prompt.
 2. Enter `City, ST` or a ZIP/postal code and click **Save** (or press **Enter**).
 3. The module fetches weather data and shows current temp, summary, high/low, feels-like, humidity, wind, and the last updated time.
-4. Click **Change** or **Change location** to update the saved location at any time.
+4. Tap the gear at the bottom of the module to re-open the location prompt and save a new city/ZIP whenever you move your mirror.
 
 ## File overview
 
 - `MMM-DailyWeatherPrompt.js` – front-end module UI, prompt handling, and socket messaging
-- `node_helper.js` – server-side fetch to OpenWeather
+- `node_helper.js` – server-side fetch to Open-Meteo
 - `MMM-DailyWeatherPrompt.css` – styling
 - `package.json` – dependencies (`node-fetch` for API calls)
 

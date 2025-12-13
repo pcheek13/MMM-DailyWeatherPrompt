@@ -2,7 +2,6 @@
 
 Module.register("MMM-DailyWeatherPrompt", {
   defaults: {
-    apiKey: "",
     location: "",
     units: "imperial", // 'imperial' (F) or 'metric' (C)
     updateInterval: 10 * 60 * 1000,
@@ -18,6 +17,7 @@ Module.register("MMM-DailyWeatherPrompt", {
     this.error = null;
     this.loading = false;
     this.userLocation = this.config.location;
+    this.isEditing = false;
     this.storageKey = "MMM-DailyWeatherPrompt::location";
 
     this.restoreLocation();
@@ -62,12 +62,6 @@ Module.register("MMM-DailyWeatherPrompt", {
   },
 
   requestWeather() {
-    if (!this.config.apiKey) {
-      this.error = "API key required in config";
-      this.updateDom();
-      return;
-    }
-
     if (!this.userLocation) {
       return;
     }
@@ -77,7 +71,6 @@ Module.register("MMM-DailyWeatherPrompt", {
     this.updateDom();
 
     this.sendSocketNotification("FETCH_WEATHER", {
-      apiKey: this.config.apiKey,
       location: this.userLocation,
       units: this.config.units
     });
@@ -106,6 +99,7 @@ Module.register("MMM-DailyWeatherPrompt", {
     }
 
     this.userLocation = value;
+    this.isEditing = false;
     this.saveLocation(value);
     this.requestWeather();
   },
@@ -138,6 +132,18 @@ Module.register("MMM-DailyWeatherPrompt", {
       }
     });
 
+    if (this.isEditing && this.userLocation) {
+      const cancel = document.createElement("button");
+      cancel.className = "dwp-inline-btn dwp-cancel";
+      cancel.innerHTML = "Cancel";
+      cancel.addEventListener("click", () => {
+        this.isEditing = false;
+        this.error = null;
+        this.updateDom();
+      });
+      wrapper.appendChild(cancel);
+    }
+
     if (this.error) {
       const error = document.createElement("div");
       error.className = "dwp-error";
@@ -156,18 +162,6 @@ Module.register("MMM-DailyWeatherPrompt", {
     title.className = "dwp-title";
     title.innerHTML = location;
     header.appendChild(title);
-
-    if (this.config.allowLocationChange) {
-      const edit = document.createElement("button");
-      edit.className = "dwp-inline-btn";
-      edit.innerHTML = "Change";
-      edit.addEventListener("click", () => {
-        this.weather = null;
-        this.error = null;
-        this.updateDom();
-      });
-      header.appendChild(edit);
-    }
 
     return header;
   },
@@ -223,20 +217,28 @@ Module.register("MMM-DailyWeatherPrompt", {
     }
 
     const footer = document.createElement("div");
-    footer.className = "dwp-updated";
-    footer.innerHTML = `Updated ${this.weather.updated}`;
-    wrapper.appendChild(footer);
+    footer.className = "dwp-footer";
+
+    const updated = document.createElement("div");
+    updated.className = "dwp-updated";
+    updated.innerHTML = `Updated ${this.weather.updated}`;
+    footer.appendChild(updated);
 
     if (this.config.allowLocationChange) {
-      const changeBtn = document.createElement("button");
-      changeBtn.className = "dwp-button dwp-ghost";
-      changeBtn.innerHTML = "Change location";
-      changeBtn.addEventListener("click", () => {
-        this.weather = null;
+      const gear = document.createElement("button");
+      gear.className = "dwp-inline-btn dwp-gear";
+      gear.innerHTML = "⚙";
+      gear.title = "Change location";
+      gear.setAttribute("aria-label", "Change location");
+      gear.addEventListener("click", () => {
+        this.isEditing = true;
+        this.error = null;
         this.updateDom();
       });
-      wrapper.appendChild(changeBtn);
+      footer.appendChild(gear);
     }
+
+    wrapper.appendChild(footer);
 
     return wrapper;
   },
@@ -245,7 +247,7 @@ Module.register("MMM-DailyWeatherPrompt", {
     const wrapper = document.createElement("div");
     wrapper.className = "dwp-container";
 
-    if (this.loading) {
+    if (this.loading && !this.isEditing) {
       const loading = document.createElement("div");
       loading.className = "dwp-loading";
       loading.innerHTML = "Loading weather...";
@@ -253,7 +255,7 @@ Module.register("MMM-DailyWeatherPrompt", {
       return wrapper;
     }
 
-    if (!this.userLocation) {
+    if (!this.userLocation || this.isEditing) {
       wrapper.appendChild(this.createPrompt());
       return wrapper;
     }

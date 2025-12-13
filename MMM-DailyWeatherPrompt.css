@@ -88,7 +88,6 @@
 
 .dwp-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
   gap: 10px;
 }
@@ -139,6 +138,13 @@
 
 .dwp-row-value {
   font-weight: 600;
+}
+
+.dwp-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
 }
 
 .dwp-updated {
