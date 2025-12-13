@@ -18,7 +18,7 @@ Run this on your Raspberry Pi (or any MagicMirror host):
 
 ```bash
 cd ~/MagicMirror/modules \
-  && git clone https://github.com/YOUR_GITHUB/MMM-DailyWeatherPrompt.git \
+  && git clone https://github.com/pcheek13/MMM-DailyWeatherPrompt.git \
   && cd MMM-DailyWeatherPrompt \
   && npm install
 ```
