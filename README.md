@@ -12,7 +12,7 @@ MagicMirror² module that displays **today’s weather** and allows you to **set
 - Edit location anytime with a single button
 - Clean, mirror-friendly UI
 
-## One-line install (copy/paste)
+## Quick install (copy/paste)
 
 Run this on your Raspberry Pi (or any MagicMirror host):
 
