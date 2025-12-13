@@ -9,7 +9,7 @@ MagicMirror² module that displays **today’s weather** and allows you to **set
 - Daily weather summary (current, high, low)
 - Feels-like temperature, humidity, and wind
 - Persistent storage via `localStorage`
-- Edit location anytime with a single button
+- Edit location anytime with a small gear button
 - Clean, mirror-friendly UI
 
 ## Quick install (copy/paste)

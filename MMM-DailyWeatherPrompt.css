@@ -66,6 +66,20 @@
   cursor: pointer;
 }
 
+.dwp-gear {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+}
+
+.dwp-cancel {
+  align-self: flex-start;
+  margin-top: 4px;
+}
+
 .dwp-weather {
   display: flex;
   flex-direction: column;
