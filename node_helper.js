@@ -9,123 +9,62 @@ module.exports = NodeHelper.create({
   },
 
   async fetchWeather(config) {
-    const { location, units } = config;
+    const { apiKey, location, units } = config;
 
-    if (!location) {
-      this.sendError("Location required");
+    if (!apiKey) {
+      this.sendError("API key missing");
       return;
     }
 
     try {
-      const coordinates = await this.lookupLocation(location);
-      const weather = await this.fetchForecast(coordinates, units);
-      this.sendSocketNotification("WEATHER_RESULT", weather);
+      const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(location)}&units=${units}&appid=${apiKey}`;
+      const response = await fetch(url);
+      if (!response.ok) {
+        const errorMessage = await this.parseError(response);
+        this.sendError(errorMessage);
+        return;
+      }
+
+      const data = await response.json();
+      this.sendSocketNotification("WEATHER_RESULT", this.transformWeather(data, units));
     } catch (error) {
       this.sendError(error.message || "Unable to reach weather service");
     }
   },
 
-  async lookupLocation(location) {
-    const geoUrl = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(location)}&count=1&language=en&format=json`;
-    const response = await fetch(geoUrl);
-
-    if (!response.ok) {
-      throw new Error(`Geocoding failed: ${response.status}`);
+  async parseError(response) {
+    try {
+      const body = await response.json();
+      return body.message || `Request failed: ${response.status}`;
+    } catch (error) {
+      return `Request failed: ${response.status}`;
     }
-
-    const data = await response.json();
-    if (!data.results || data.results.length === 0) {
-      throw new Error("Location not found");
-    }
-
-    const result = data.results[0];
-    return {
-      latitude: result.latitude,
-      longitude: result.longitude,
-      displayName: `${result.name}${result.admin1 ? `, ${result.admin1}` : ""}, ${result.country_code}`
-    };
   },
 
-  async fetchForecast(coords, units) {
-    const useMetric = units === "metric";
-    const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${coords.latitude}&longitude=${coords.longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min&timezone=auto&temperature_unit=${useMetric ? "celsius" : "fahrenheit"}&wind_speed_unit=${useMetric ? "kmh" : "mph"}&forecast_days=1`;
-
-    const response = await fetch(weatherUrl);
-    if (!response.ok) {
-      throw new Error(`Weather request failed: ${response.status}`);
-    }
-
-    const data = await response.json();
-
-    return this.transformWeather(coords.displayName, data, units);
-  },
-
-  transformWeather(locationName, data, units) {
-    const current = data.current || {};
-    const daily = data.daily || {};
-
-    const high = Array.isArray(daily.temperature_2m_max) ? daily.temperature_2m_max[0] : null;
-    const low = Array.isArray(daily.temperature_2m_min) ? daily.temperature_2m_min[0] : null;
+  transformWeather(data, units) {
+    const temperature = Math.round(data.main.temp);
+    const high = Math.round(data.main.temp_max);
+    const low = Math.round(data.main.temp_min);
+    const feelsLike = Math.round(data.main.feels_like);
+    const windSpeed = units === "metric" ? Math.round(data.wind.speed * 3.6) : Math.round(data.wind.speed);
 
     return {
-      locationName,
-      summary: this.describeWeather(current.weather_code),
-      temperature: this.round(current.temperature_2m),
-      high: this.round(high),
-      low: this.round(low),
-      feelsLike: this.round(current.apparent_temperature),
-      humidity: this.round(current.relative_humidity_2m),
-      windSpeed: this.round(current.wind_speed_10m),
+      locationName: `${data.name}, ${data.sys.country}`,
+      summary: data.weather?.[0]?.description || "",
+      temperature,
+      high,
+      low,
+      feelsLike,
+      humidity: Math.round(data.main.humidity),
+      windSpeed,
       windUnit: units === "metric" ? "km/h" : "mph",
-      updated: this.formatTime(current.time),
-      icon: null
+      updated: this.formatTime(data.dt),
+      icon: data.weather?.[0]?.icon
     };
-  },
-
-  describeWeather(code) {
-    const map = {
-      0: "Clear sky",
-      1: "Mainly clear",
-      2: "Partly cloudy",
-      3: "Overcast",
-      45: "Fog",
-      48: "Depositing rime fog",
-      51: "Light drizzle",
-      53: "Moderate drizzle",
-      55: "Dense drizzle",
-      56: "Freezing drizzle",
-      57: "Freezing drizzle",
-      61: "Slight rain",
-      63: "Moderate rain",
-      65: "Heavy rain",
-      66: "Freezing rain",
-      67: "Freezing rain",
-      71: "Slight snow",
-      73: "Moderate snow",
-      75: "Heavy snow",
-      77: "Snow grains",
-      80: "Slight showers",
-      81: "Moderate showers",
-      82: "Violent showers",
-      85: "Snow showers",
-      86: "Heavy snow showers",
-      95: "Thunderstorm",
-      96: "Thunderstorm with hail",
-      99: "Thunderstorm with hail"
-    };
-
-    return map[code] || "";
-  },
-
-  round(value) {
-    if (value === null || value === undefined || Number.isNaN(Number(value))) {
-      return "--";
-    }
-    return Math.round(value);
   },
 
   formatTime(unixTime) {
-    const date = typeof unixTime === "string" ? new Date(unixTime) : new Date((unixTime || Date.now() / 1000) * 1000);
+    const date = new Date((unixTime || Date.now() / 1000) * 1000);
     return date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
   },
 
