@@ -1,0 +1,144 @@
+.dwp-container {
+  color: #fff;
+  font-family: "Roboto", "Helvetica Neue", Arial, sans-serif;
+  text-align: left;
+  max-width: 360px;
+  padding: 12px 16px;
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+}
+
+.dwp-prompt {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dwp-label {
+  font-size: 14px;
+  letter-spacing: 0.4px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.dwp-input {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: #fff;
+  font-size: 16px;
+  outline: none;
+}
+
+.dwp-button {
+  background: #3f9dfd;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+
+.dwp-button:hover {
+  background: #6cb4ff;
+}
+
+.dwp-button:active {
+  transform: scale(0.99);
+}
+
+.dwp-ghost {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+.dwp-inline-btn {
+  margin-left: 10px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.dwp-weather {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dwp-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.dwp-title {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.dwp-summary {
+  font-size: 16px;
+  text-transform: capitalize;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.dwp-temps {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.dwp-temp-now {
+  font-size: 48px;
+  font-weight: 600;
+}
+
+.dwp-temp-range {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.dwp-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.dwp-row:last-child {
+  border-bottom: none;
+}
+
+.dwp-row-label {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.dwp-row-value {
+  font-weight: 600;
+}
+
+.dwp-updated {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  text-align: right;
+}
+
+.dwp-loading {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.dwp-error {
+  color: #ffb3b3;
+  font-size: 13px;
+}
