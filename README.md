@@ -12,7 +12,7 @@ MagicMirror² module that displays **today’s weather** and allows you to **set
 - Edit location anytime with a small gear button
 - Clean, mirror-friendly UI
 
-## One-line install (copy/paste)
+## Quick install (copy/paste)
 
 Run this on your Raspberry Pi (or any MagicMirror host):
 
@@ -54,7 +54,7 @@ Add the module to your `config.js`:
 1. On first load (no location configured), the module displays an input prompt.
 2. Enter `City, ST` or a ZIP/postal code and click **Save** (or press **Enter**).
 3. The module fetches weather data and shows current temp, summary, high/low, feels-like, humidity, wind, and the last updated time.
-4. Tap the gear in the top-right of the module to re-open the location prompt and save a new city/ZIP whenever you move your mirror.
+4. Click **Change** or **Change location** to update the saved location at any time.
 
 ## File overview
 
