@@ -1,0 +1,19 @@
+:root {
+  --mmm-sleep-dim-level: 0.2;
+  --mmm-sleep-fade-duration: 1.5s;
+}
+
+:root.mmm-sleep-dimmed,
+body.mmm-sleep-dimmed {
+  filter: brightness(var(--mmm-sleep-dim-level));
+  transition: filter var(--mmm-sleep-fade-duration) ease-in-out;
+}
+
+.mmm-sleep-mode {
+  text-align: center;
+}
+
+.mmm-sleep-mode .status {
+  font-size: 20px;
+  color: #999;
+}
