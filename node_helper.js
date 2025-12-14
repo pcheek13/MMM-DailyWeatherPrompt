@@ -48,7 +48,7 @@ module.exports = NodeHelper.create({
 
   async fetchForecast(coords, units) {
     const useMetric = units === "metric";
-    const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${coords.latitude}&longitude=${coords.longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min&timezone=auto&temperature_unit=${useMetric ? "celsius" : "fahrenheit"}&wind_speed_unit=${useMetric ? "kmh" : "mph"}&forecast_days=1`;
+    const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${coords.latitude}&longitude=${coords.longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=auto&temperature_unit=${useMetric ? "celsius" : "fahrenheit"}&wind_speed_unit=${useMetric ? "kmh" : "mph"}&forecast_days=5`;
 
     const response = await fetch(weatherUrl);
     if (!response.ok) {
@@ -67,6 +67,8 @@ module.exports = NodeHelper.create({
     const high = Array.isArray(daily.temperature_2m_max) ? daily.temperature_2m_max[0] : null;
     const low = Array.isArray(daily.temperature_2m_min) ? daily.temperature_2m_min[0] : null;
 
+    const forecast = this.buildForecast(daily);
+
     return {
       locationName,
       summary: this.describeWeather(current.weather_code),
@@ -78,8 +80,23 @@ module.exports = NodeHelper.create({
       windSpeed: this.round(current.wind_speed_10m),
       windUnit: units === "metric" ? "km/h" : "mph",
       updated: this.formatTime(current.time),
-      icon: null
+      icon: null,
+      forecast
     };
+  },
+
+  buildForecast(daily) {
+    const times = Array.isArray(daily.time) ? daily.time : [];
+    const highs = Array.isArray(daily.temperature_2m_max) ? daily.temperature_2m_max : [];
+    const lows = Array.isArray(daily.temperature_2m_min) ? daily.temperature_2m_min : [];
+    const codes = Array.isArray(daily.weather_code) ? daily.weather_code : [];
+
+    return times.slice(0, 5).map((time, index) => ({
+      label: this.formatDay(time, index),
+      high: this.round(highs[index]),
+      low: this.round(lows[index]),
+      summary: this.describeWeather(codes[index])
+    }));
   },
 
   describeWeather(code) {
@@ -127,6 +144,18 @@ module.exports = NodeHelper.create({
   formatTime(unixTime) {
     const date = typeof unixTime === "string" ? new Date(unixTime) : new Date((unixTime || Date.now() / 1000) * 1000);
     return date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+  },
+
+  formatDay(dateString, index) {
+    if (index === 0) {
+      return "Today";
+    }
+    if (!dateString) {
+      return "--";
+    }
+    const date = new Date(dateString);
+    const dayName = date.toLocaleDateString([], { weekday: "short" });
+    return dayName || "--";
   },
 
   sendError(message) {

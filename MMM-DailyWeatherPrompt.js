@@ -18,6 +18,7 @@ Module.register("MMM-DailyWeatherPrompt", {
     this.loading = false;
     this.userLocation = this.config.location;
     this.isEditing = false;
+    this.keypadMode = "numeric";
     this.storageKey = "MMM-DailyWeatherPrompt::location";
 
     this.restoreLocation();
@@ -104,6 +105,24 @@ Module.register("MMM-DailyWeatherPrompt", {
     this.requestWeather();
   },
 
+  handleKeypadInput(input, value) {
+    if (!input) {
+      return;
+    }
+
+    if (value === "BACKSPACE") {
+      input.value = input.value.slice(0, -1);
+      return;
+    }
+
+    if (value === "CLEAR") {
+      input.value = "";
+      return;
+    }
+
+    input.value += value;
+  },
+
   createPrompt() {
     const wrapper = document.createElement("div");
     wrapper.className = "dwp-prompt";
@@ -125,6 +144,79 @@ Module.register("MMM-DailyWeatherPrompt", {
     button.innerHTML = this.userLocation ? "Update" : "Save";
     button.addEventListener("click", () => this.setLocationFromInput(input));
     wrapper.appendChild(button);
+
+    const keypadSection = document.createElement("div");
+    keypadSection.className = "dwp-keypad";
+
+    const toggleRow = document.createElement("div");
+    toggleRow.className = "dwp-keypad-toggle";
+
+    const toggleLabel = document.createElement("div");
+    toggleLabel.className = "dwp-keypad-label";
+    toggleLabel.innerHTML = "Touch keypad";
+    toggleRow.appendChild(toggleLabel);
+
+    const toggleButtons = document.createElement("div");
+    toggleButtons.className = "dwp-toggle-group";
+
+    const numericBtn = document.createElement("button");
+    numericBtn.className = "dwp-toggle";
+    numericBtn.innerHTML = "ZIP";
+
+    const alphaBtn = document.createElement("button");
+    alphaBtn.className = "dwp-toggle";
+    alphaBtn.innerHTML = "Letters";
+
+    const updateToggleState = () => {
+      if (this.keypadMode === "numeric") {
+        numericBtn.classList.add("active");
+        alphaBtn.classList.remove("active");
+      } else {
+        alphaBtn.classList.add("active");
+        numericBtn.classList.remove("active");
+      }
+    };
+
+    numericBtn.addEventListener("click", () => {
+      this.keypadMode = "numeric";
+      this.updateDom();
+    });
+
+    alphaBtn.addEventListener("click", () => {
+      this.keypadMode = "alpha";
+      this.updateDom();
+    });
+
+    updateToggleState();
+
+    toggleButtons.appendChild(numericBtn);
+    toggleButtons.appendChild(alphaBtn);
+    toggleRow.appendChild(toggleButtons);
+    keypadSection.appendChild(toggleRow);
+
+    const keysGrid = document.createElement("div");
+    keysGrid.className = "dwp-keys";
+
+    const addKeyButton = (label, value = label) => {
+      const keyBtn = document.createElement("button");
+      keyBtn.className = "dwp-key";
+      keyBtn.innerHTML = label;
+      keyBtn.addEventListener("click", () => this.handleKeypadInput(input, value));
+      keysGrid.appendChild(keyBtn);
+    };
+
+    if (this.keypadMode === "numeric") {
+      ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"].forEach((digit) => addKeyButton(digit));
+    } else {
+      ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", "A", "S", "D", "F", "G", "H", "J", "K", "L", "Z", "X", "C", "V", "B", "N", "M"].forEach((letter) => addKeyButton(letter));
+      addKeyButton("Space", " ");
+    }
+
+    addKeyButton("←", "BACKSPACE");
+    addKeyButton("Clear", "CLEAR");
+
+    keypadSection.appendChild(keysGrid);
+    wrapper.appendChild(keypadSection);
 
     input.addEventListener("keyup", (evt) => {
       if (evt.key === "Enter") {
@@ -240,7 +332,49 @@ Module.register("MMM-DailyWeatherPrompt", {
 
     wrapper.appendChild(footer);
 
+    if (Array.isArray(this.weather.forecast) && this.weather.forecast.length) {
+      wrapper.appendChild(this.renderForecast(this.weather.forecast));
+    }
+
     return wrapper;
+  },
+
+  renderForecast(days) {
+    const container = document.createElement("div");
+    container.className = "dwp-forecast";
+
+    const title = document.createElement("div");
+    title.className = "dwp-forecast-title";
+    title.innerHTML = "Next 5 days";
+    container.appendChild(title);
+
+    const list = document.createElement("div");
+    list.className = "dwp-forecast-list";
+
+    days.forEach((day) => {
+      const row = document.createElement("div");
+      row.className = "dwp-forecast-row";
+
+      const label = document.createElement("div");
+      label.className = "dwp-forecast-day";
+      label.innerHTML = day.label || "--";
+      row.appendChild(label);
+
+      const summary = document.createElement("div");
+      summary.className = "dwp-forecast-summary";
+      summary.innerHTML = day.summary || "";
+      row.appendChild(summary);
+
+      const temps = document.createElement("div");
+      temps.className = "dwp-forecast-temps";
+      temps.innerHTML = `H ${day.high}&deg; / L ${day.low}&deg;`;
+      row.appendChild(temps);
+
+      list.appendChild(row);
+    });
+
+    container.appendChild(list);
+    return container;
   },
 
   getDom() {

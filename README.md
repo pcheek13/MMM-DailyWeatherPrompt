@@ -5,8 +5,9 @@ MagicMirror² module that displays **today’s weather** and allows you to **set
 ## Features
 
 - On-screen location prompt (no config edit required)
+- Touch keypad with ZIP entry and letter toggle for city names
 - Accepts **City, ST** or **ZIP code**
-- Daily weather summary (current, high, low)
+- Daily weather summary (current, high, low) plus a 5-day outlook
 - Feels-like temperature, humidity, and wind
 - Persistent storage via `localStorage`
 - Edit location anytime with a small gear button along the bottom of the module
@@ -52,8 +53,9 @@ Add the module to your `config.js`:
 
 1. On first load (no location configured), the module displays an input prompt.
 2. Enter `City, ST` or a ZIP/postal code and click **Save** (or press **Enter**).
-3. The module fetches weather data and shows current temp, summary, high/low, feels-like, humidity, wind, and the last updated time.
-4. Tap the gear at the bottom of the module to re-open the location prompt and save a new city/ZIP whenever you move your mirror.
+3. Use the on-screen keypad: **ZIP** mode defaults to numbers, and the **Letters** toggle switches to city input. You can still type with a physical keyboard.
+4. Click **Save** to fetch weather data (current temp, summary, high/low, feels-like, humidity, wind, and the last updated time) plus a 5-day forecast.
+5. Tap the gear at the bottom of the module to re-open the location prompt and save a new city/ZIP whenever you move your mirror.
 
 ## File overview
 
